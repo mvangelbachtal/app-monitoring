@@ -1,0 +1,16 @@
+apiVersion: 1
+
+datasources:
+  - name: DB-Umami
+    type: postgres
+    access: proxy
+    url: umami_db:5432
+    user: umami
+    secureJsonData:
+      password: "PIvSN6VOwDQZ70Gpivi1fgmmMSxmE5hOwnMpkogF5TXm3"
+    jsonData:
+      database: umami
+      sslmode: 'disable'
+      postgresVersion: 1500
+      timescaledb: false
+

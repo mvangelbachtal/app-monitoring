@@ -1,0 +1,108 @@
+services:
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: "change-me"
+      GF_AUTH_GENERIC_OAUTH_ENABLED: "true"
+      GF_AUTH_GENERIC_OAUTH_NAME: "authentik"
+      GF_AUTH_GENERIC_OAUTH_CLIENT_ID: "grafana"
+      GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET:
+      GF_AUTH_GENERIC_OAUTH_SCOPES: "openid profile email"
+      GF_AUTH_GENERIC_OAUTH_AUTH_URL: "https://id.mv-angelbachtal.de/application/o/authorize/"
+      GF_AUTH_GENERIC_OAUTH_TOKEN_URL: "https://id.mv-angelbachtal.de/application/o/token/"
+      GF_AUTH_GENERIC_OAUTH_API_URL: "https://id.mv-angelbachtal.de/application/o/userinfo/"
+      GF_AUTH_SIGNOUT_REDIRECT_URL: "https://id.mv-angelbachtal.de/application/o/grafana/end-session/"
+      GF_AUTH_OAUTH_AUTO_LOGIN: "true"
+      GF_AUTH_GENERIC_OAUTH_ROLE_ATTRIBUTE_PATH: "contains(groups[*], 'Grafana Admins') && 'Admin' || contains(groups[*], 'Grafana Editors') && 'Editor' || contains(groups[*], 'Grafana Viewers') && 'Viewer'"
+      GF_SERVER_ROOT_URL: "https://grafana.mv-angelbachtal.de"
+      VIRTUAL_HOST: "grafana.mv-angelbachtal.de"
+      LETSENCRYPT_HOST: "grafana.mv-angelbachtal.de"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    networks: [monitoring, grafana, proxy]
+    depends_on: [prometheus, loki]
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    networks: [monitoring, prometheus]
+
+  loki:
+    image: grafana/loki:latest
+    command: -config.file=/etc/loki/local-config.yaml
+    networks: [monitoring]
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+    networks: [monitoring]
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    command:
+      - '--housekeeping_interval=15s'
+      - '--docker_only=true'
+      #- '--disable_metrics=disk,tcp,udp,percpu,sched'
+    networks: [monitoring]
+
+  promtail:
+    image: grafana/promtail:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./promtail/promtail.yml:/etc/promtail/config.yml:ro
+      - type: volume
+        source: nextcloud_aio_nextcloud
+        target: /var/log/nextcloud
+        volume:
+          subpath: data
+    command: -config.file=/etc/promtail/config.yml
+    networks: [monitoring]
+
+  nextcloud-exporter:
+    image: ghcr.io/xperimental/nextcloud-exporter:latest
+    environment:
+      NEXTCLOUD_SERVER: "http://nextcloud-aio-apache:80"
+      NEXTCLOUD_AUTH_TOKEN:
+      NEXTCLOUD_INFO_APPS: TRUE
+      NEXTCLOUD_INFO_UPDATE: TRUE
+    networks: [prometheus]
+
+  netcupscp-exporter:
+    image: ghcr.io/mrueg/netcupscp-exporter:v0.5.0
+    restart: unless-stopped
+    expose:
+      - "9757"
+    environment:
+      - SCP_REFRESHTOKEN=${SCP_REFRESHTOKEN}
+    networks: [prometheus]
+
+volumes:
+  grafana-data:
+  prometheus-data:
+  nextcloud_aio_nextcloud:
+    name: nextcloud_aio_nextcloud
+    external: true
+
+networks:
+  monitoring:
+    internal: true
+  grafana:
+    external: true
+  prometheus:
+    external: true
+  proxy:
+    external: true
+
