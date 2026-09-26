@@ -3,6 +3,7 @@ services:
     image: grafana/grafana:latest
     environment:
       GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD:?Set this in the local .env file}
+      UMAMI_DB_PASSWORD: ${UMAMI_DB_PASSWORD:?Set this in the local .env file}
       GF_AUTH_GENERIC_OAUTH_ENABLED: "true"
       GF_AUTH_GENERIC_OAUTH_NAME: "authentik"
       GF_AUTH_GENERIC_OAUTH_CLIENT_ID: "grafana"

@@ -7,10 +7,9 @@ datasources:
     url: umami_db:5432
     user: umami
     secureJsonData:
-      password: "PIvSN6VOwDQZ70Gpivi1fgmmMSxmE5hOwnMpkogF5TXm3"
+      password: $__env{UMAMI_DB_PASSWORD}
     jsonData:
       database: umami
       sslmode: 'disable'
       postgresVersion: 1500
       timescaledb: false
-
