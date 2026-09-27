@@ -76,7 +76,7 @@ services:
     image: ghcr.io/xperimental/nextcloud-exporter:latest
     environment:
       NEXTCLOUD_SERVER: "http://nextcloud-aio-apache:80"
-      NEXTCLOUD_AUTH_TOKEN:
+      NEXTCLOUD_AUTH_TOKEN: ${MONITORING_NEXTCLOUD_AUTH_TOKEN:?Set this in the local secrets.env file}
       NEXTCLOUD_INFO_APPS: TRUE
       NEXTCLOUD_INFO_UPDATE: TRUE
     networks: [prometheus]
