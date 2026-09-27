@@ -1,6 +1,6 @@
 services:
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:13.2.2
     environment:
       UMAMI_DB_PASSWORD: ${UMAMI_POSTGRES_PASSWORD:?Set this in the local secrets.env file}
       GF_SECURITY_DISABLE_INITIAL_ADMIN_CREATION: "true"
@@ -25,19 +25,19 @@ services:
     depends_on: [prometheus, loki]
 
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v3.15.0
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus-data:/prometheus
     networks: [monitoring, prometheus]
 
   loki:
-    image: grafana/loki:latest
+    image: grafana/loki:3.7.8
     command: -config.file=/etc/loki/local-config.yaml
     networks: [monitoring]
 
   node-exporter:
-    image: prom/node-exporter:latest
+    image: prom/node-exporter:v1.12.1
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
@@ -47,7 +47,7 @@ services:
     networks: [monitoring]
 
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor:latest
+    image: gcr.io/cadvisor/cadvisor:v0.55.1
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:ro
@@ -60,7 +60,7 @@ services:
     networks: [monitoring]
 
   promtail:
-    image: grafana/promtail:latest
+    image: grafana/promtail:3.6.11
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./promtail/promtail.yml:/etc/promtail/config.yml:ro
@@ -73,7 +73,7 @@ services:
     networks: [monitoring]
 
   nextcloud-exporter:
-    image: ghcr.io/xperimental/nextcloud-exporter:latest
+    image: ghcr.io/xperimental/nextcloud-exporter:0.9.1
     environment:
       NEXTCLOUD_SERVER: "http://nextcloud-aio-apache:80"
       NEXTCLOUD_AUTH_TOKEN: ${MONITORING_NEXTCLOUD_AUTH_TOKEN:?Set this in the local secrets.env file}
