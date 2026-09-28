@@ -7,7 +7,7 @@ datasources:
     url: umami_db:5432
     user: umami
     secureJsonData:
-      password: $__env{MONITORING_UMAMI_DB_PASSWORD}
+      password: $__env{UMAMI_DB_PASSWORD}
     jsonData:
       database: umami
       sslmode: 'disable'
