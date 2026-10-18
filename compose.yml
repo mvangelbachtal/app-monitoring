@@ -73,7 +73,7 @@ services:
     networks: [monitoring]
 
   nextcloud-exporter:
-    image: ghcr.io/xperimental/nextcloud-exporter:0.9.1
+    image: ghcr.io/xperimental/nextcloud-exporter:0.9.2
     environment:
       NEXTCLOUD_SERVER: "http://nextcloud-aio-apache:80"
       NEXTCLOUD_AUTH_TOKEN: ${MONITORING_NEXTCLOUD_AUTH_TOKEN:?Set this in the local secrets.env file}
