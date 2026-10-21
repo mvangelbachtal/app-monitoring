@@ -32,7 +32,7 @@ services:
     networks: [monitoring, prometheus]
 
   loki:
-    image: grafana/loki:3.7.8
+    image: grafana/loki:3.7.9
     command: -config.file=/etc/loki/local-config.yaml
     networks: [monitoring]
 
